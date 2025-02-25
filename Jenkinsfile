@@ -1,30 +1,44 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = 'manish1990786/jenkins-ci-demo:latest'
+    }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/manish1990786/jenkins-ci-demo'
             }
         }
-
+        
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                bat 'npm install'  // If using Node.js
+                bat 'npm install'
             }
         }
-
+        
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                bat 'npm test' // Run tests
+                bat 'npm test --runInBand --forceExit'
             }
         }
-
+        
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        bat "docker build -t ${DOCKER_IMAGE} ."
+                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
+                        bat "docker push ${DOCKER_IMAGE}"
+                    }
+                }
+            }
+        }
+        
         stage('Deploy to Staging') {
             steps {
-                echo 'Deploying to Staging...'
+                bat "docker run -d -p 3000:3000 ${DOCKER_IMAGE}"
             }
         }
 
@@ -33,14 +47,17 @@ pipeline {
                 branch 'main'
             }
             steps {
-                echo 'Deploying to Production...'
+                bat "docker run -d -p 80:3000 ${DOCKER_IMAGE}"
             }
         }
     }
 
     post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
         failure {
-            echo 'Build failed! Sending notification...'
+            echo 'Pipeline failed!'
         }
     }
 }
