@@ -1,56 +1,46 @@
 pipeline {
     agent any
 
-    environment {
-        NODE_VERSION = '16'
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Clone Repository') {
             steps {
-                git 'https://github.com/your-username/jenkins-ci-app.git'
+                git 'https://github.com/your-repo/JenkinsProject.git'
             }
         }
-        
+
         stage('Build') {
             steps {
-                bat 'npm install'
+                echo 'Building the application...'
+                sh 'npm install'  // If using Node.js
             }
         }
-        
+
         stage('Test') {
             steps {
-                bat 'npm test'
+                echo 'Running tests...'
+                sh 'npm test' // Run tests
             }
         }
-        
-        stage('Docker Build & Push') {
-            steps {
-                bat 'docker build -t your-dockerhub-username/jenkins-ci-app:latest .'
-                bat 'echo "%DOCKER_PASSWORD%" | docker login -u "%DOCKER_USERNAME%" --password-stdin'
-                bat 'docker push your-dockerhub-username/jenkins-ci-app:latest'
-            }
-        }
-        
+
         stage('Deploy to Staging') {
             steps {
-                bat 'echo Deploying to Staging...'
+                echo 'Deploying to Staging...'
             }
         }
 
         stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
             steps {
-                bat 'echo Deploying to Production...'
+                echo 'Deploying to Production...'
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
         failure {
-            echo 'Pipeline failed!'
+            echo 'Build failed! Sending notification...'
         }
     }
 }
