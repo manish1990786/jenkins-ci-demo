@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/manish1990786/jenkins-ci-demo'
+                git branch: 'main', url: 'https://github.com/manish1990786/jenkins-ci-demo'
             }
         }
 
