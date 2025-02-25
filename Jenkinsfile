@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'slave-only' }
+    agent { label 'Slave-Node' }
 
     environment {
         DOCKER_IMAGE = 'manish1990786/jenkins-ci-demo:latest'
