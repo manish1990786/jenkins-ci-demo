@@ -9,6 +9,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'feature-test', url: 'https://github.com/manish1990786/jenkins-ci-demo'
+                bat 'git checkout ${BRANCH_NAME}'
             }
         }
         
