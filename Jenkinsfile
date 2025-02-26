@@ -8,23 +8,29 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/manish1990786/jenkins-ci-demo'
+                script {
+                    echo "Checking out branch: ${env.BRANCH_NAME}"
+                    git branch: "${env.BRANCH_NAME}", url: 'https://github.com/manish1990786/jenkins-ci-demo'
+                }
             }
         }
-        
+
         stage('Build') {
             steps {
                 bat 'npm install'
             }
         }
-        
+
         stage('Test') {
             steps {
                 bat 'npm test --runInBand --forceExit'
             }
         }
-        
+
         stage('Docker Build & Push') {
+            when {
+                expression { env.BRANCH_NAME == 'main' }
+            }
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -35,8 +41,11 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Staging') {
+            when {
+                expression { env.BRANCH_NAME == 'feature-test' }
+            }
             steps {
                 bat "docker run -d -p 3000:3000 ${DOCKER_IMAGE}"
             }
@@ -44,7 +53,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 bat "docker run -d -p 80:3000 ${DOCKER_IMAGE}"
