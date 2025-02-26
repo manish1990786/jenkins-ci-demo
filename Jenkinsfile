@@ -2,14 +2,17 @@ pipeline {
     agent { label 'Slave-Node' }
 
     environment {
-        DOCKER_IMAGE = 'manish1990786/jenkins-ci-demo:latest'
+        DOCKER_IMAGE = "manish1990786/jenkins-ci-demo:latest"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'feature-test', url: 'https://github.com/manish1990786/jenkins-ci-demo'
-                bat 'git checkout ${BRANCH_NAME}'
+                script {
+                    def branchName = env.BRANCH_NAME ?: 'main'  // Dynamically get the branch name
+                    echo "Building branch: ${branchName}"
+                    git branch: branchName, url: 'https://github.com/manish1990786/jenkins-ci-demo'
+                }
             }
         }
         
@@ -27,13 +30,13 @@ pipeline {
         
         stage('Docker Build & Push') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         bat "docker build -t ${DOCKER_IMAGE} ."
-                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin"
                         bat "docker push ${DOCKER_IMAGE}"
                     }
                 }
@@ -42,7 +45,7 @@ pipeline {
         
         stage('Deploy to Staging') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 bat "docker run -d -p 3000:3000 ${DOCKER_IMAGE}"
@@ -51,7 +54,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 bat "docker run -d -p 80:3000 ${DOCKER_IMAGE}"
