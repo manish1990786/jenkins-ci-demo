@@ -25,6 +25,9 @@ pipeline {
         }
         
         stage('Docker Build & Push') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -37,6 +40,9 @@ pipeline {
         }
         
         stage('Deploy to Staging') {
+            when {
+                branch 'main'
+            }
             steps {
                 bat "docker run -d -p 3000:3000 ${DOCKER_IMAGE}"
             }
