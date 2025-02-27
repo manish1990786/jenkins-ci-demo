@@ -47,9 +47,16 @@ pipeline {
             when {
                 expression { env.BRANCH_NAME == 'main' }
             }
-            steps {
-                bat "docker run -d -p 3000:3000 ${DOCKER_IMAGE}"
-            }
+            script {
+                    echo "Pulling latest image from Docker Hub for Staging"
+                    bat "docker pull ${DOCKER_IMAGE}"
+                    echo "Stopping existing Staging container if running..."
+                    bat "docker stop staging || echo 'Staging container not running'"
+                    bat "docker rm staging || echo 'No Staging container to remove'"
+                    
+                    echo "Running Staging environment on port 3000..."
+                    bat "docker run -d --name staging -p 3000:3000 ${DOCKER_IMAGE}"
+                }
         }
 
         stage('Deploy to Production') {
@@ -57,7 +64,14 @@ pipeline {
                 expression { env.BRANCH_NAME == 'main' }
             }
             steps {
-                bat "docker run -d -p 80:3000 ${DOCKER_IMAGE}"
+                echo "Pulling latest image from Docker Hub for Production"
+                    bat "docker pull ${DOCKER_IMAGE}"
+                    echo "Stopping existing Production container if running..."
+                    bat "docker stop production || echo 'Production container not running'"
+                    bat "docker rm production || echo 'No Production container to remove'"
+                    
+                    echo "Running Production environment on port 80..."
+                    bat "docker run -d --name production -p 80:3000 ${DOCKER_IMAGE}"
             }
         }
     }
