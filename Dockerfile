@@ -7,7 +7,6 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the rest of the application
 COPY . .
 
 # Expose the application port
