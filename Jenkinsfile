@@ -53,8 +53,8 @@ pipeline {
                     bat "docker pull ${DOCKER_IMAGE}"
                     
                     echo "Stopping existing Staging container if running..."
-                    bat "docker stop staging || echo 'Staging container not running'"
-                    bat "docker rm staging || echo 'No Staging container to remove'"
+                    bat "docker stop staging || exit 0"
+                    bat "docker rm staging || exit 0"
                     
                     echo "Running Staging environment on port 3001..."
                     bat "docker run -d --name staging -p 3001:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
@@ -72,8 +72,8 @@ pipeline {
                     bat "docker pull ${DOCKER_IMAGE}"
                     
                     echo "Stopping existing Production container if running..."
-                    bat "docker stop production || echo 'Production container not running'"
-                    bat "docker rm production || echo 'No Production container to remove'"
+                    bat "docker stop production || exit 0"
+                    bat "docker rm production || exit 0"
                     
                     echo "Running Production environment on port 3002..."
                     bat "docker run -d --name production -p 3002:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
