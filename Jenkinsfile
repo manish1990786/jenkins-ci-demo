@@ -47,7 +47,7 @@ pipeline {
             when {
                 expression { env.BRANCH_NAME == 'main' }
             }
-            steps {  // FIXED: Changed "step" to "steps"
+            steps {
                 script {
                     echo "Pulling latest image from Docker Hub for Staging..."
                     bat "docker pull ${DOCKER_IMAGE}"
@@ -57,7 +57,7 @@ pipeline {
                     bat "docker rm staging || exit 0"
                     
                     echo "Running Staging environment on port 3001..."
-                    bat "docker run -d --name staging -p 3001:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
+                    bat "docker run -d --name staging -p 3001:3000 ${DOCKER_IMAGE}"
                 }
             }
         }
@@ -76,7 +76,7 @@ pipeline {
                     bat "docker rm production || exit 0"
                     
                     echo "Running Production environment on port 3002..."
-                    bat "docker run -d --name production -p 3002:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
+                    bat "docker run -d --name production -p 3002:3000 ${DOCKER_IMAGE}"
                 }
             }
         }
