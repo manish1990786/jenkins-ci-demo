@@ -1,4 +1,3 @@
-# Use official Node.js image
 FROM node:16
 
 WORKDIR /app
