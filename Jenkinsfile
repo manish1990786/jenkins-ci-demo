@@ -36,7 +36,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         bat "docker build -t ${DOCKER_IMAGE} ."
-                        bat "echo %DOCKER_PASS% | docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+                        bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
                         bat "docker push ${DOCKER_IMAGE}"
                     }
                 }
@@ -47,16 +47,19 @@ pipeline {
             when {
                 expression { env.BRANCH_NAME == 'main' }
             }
-            script {
-                    echo "Pulling latest image from Docker Hub for Staging"
+            steps {  // FIXED: Changed "step" to "steps"
+                script {
+                    echo "Pulling latest image from Docker Hub for Staging..."
                     bat "docker pull ${DOCKER_IMAGE}"
+                    
                     echo "Stopping existing Staging container if running..."
                     bat "docker stop staging || echo 'Staging container not running'"
                     bat "docker rm staging || echo 'No Staging container to remove'"
                     
-                    echo "Running Staging environment on port 3000..."
-                    bat "docker run -d --name staging -p 3000:3000 ${DOCKER_IMAGE}"
+                    echo "Running Staging environment on port 3001..."
+                    bat "docker run -d --name staging -p 3001:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
                 }
+            }
         }
 
         stage('Deploy to Production') {
@@ -64,14 +67,17 @@ pipeline {
                 expression { env.BRANCH_NAME == 'main' }
             }
             steps {
-                echo "Pulling latest image from Docker Hub for Production"
+                script {
+                    echo "Pulling latest image from Docker Hub for Production..."
                     bat "docker pull ${DOCKER_IMAGE}"
+                    
                     echo "Stopping existing Production container if running..."
                     bat "docker stop production || echo 'Production container not running'"
                     bat "docker rm production || echo 'No Production container to remove'"
                     
-                    echo "Running Production environment on port 80..."
-                    bat "docker run -d --name production -p 80:3000 ${DOCKER_IMAGE}"
+                    echo "Running Production environment on port 3002..."
+                    bat "docker run -d --name production -p 3002:3000 ${DOCKER_IMAGE}" // FIXED: Corrected Port Mapping
+                }
             }
         }
     }
