@@ -133,8 +133,7 @@ pipeline {
                 emailext subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                          body: "Build ${env.BUILD_NUMBER} completed successfully!\n\nCheck logs at: ${env.BUILD_URL}",
                          to: "manishbansal019@gmail.com",
-                         from: "manishbansal019@gmail.com",
-                         debug: true
+                         from: "manishbansal019@gmail.com"
         }
         failure {
             script {
@@ -143,8 +142,7 @@ pipeline {
                 emailext subject: "Jenkins Build FAILED: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                          body: "Build ${env.BUILD_NUMBER} has failed!\nCheck logs at: ${env.BUILD_URL}",
                          to: "manishbansal019@gmail.com",
-                         from: "manishbansal019@gmail.com",
-                         debug: true
+                         from: "manishbansal019@gmail.com"
 
                 bat 'echo "Build failed on %DATE% %TIME%" >> build_logs.txt'
                 bat 'docker logs staging >> build_logs.txt 2>&1'
