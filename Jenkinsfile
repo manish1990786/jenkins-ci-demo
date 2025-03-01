@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        bat 'exit 1' // This forces the stage to fail
+                        // bat 'exit 1' // This forces the stage to fail
                         bat 'npm test --runInBand --forceExit'
                     } catch (Exception e) {
                         echo "Tests failed: ${e.message}"
@@ -128,13 +128,18 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline executed successfully!'
+            echo 'Pipeline executed successfully! Sending success notification...'
+                
+                emailext subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                         body: "Build ${env.BUILD_NUMBER} completed successfully!\n\nCheck logs at: ${env.BUILD_URL}",
+                         to: "manishbansal019@gmail.com",
+                         from: "manishbansal019@gmail.com"
         }
         failure {
             script {
                 echo 'Pipeline failed! Sending failure notification...'
 
-                emailext subject: "🚨 Jenkins Build FAILED: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                emailext subject: "Jenkins Build FAILED: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                          body: "Build ${env.BUILD_NUMBER} has failed!\nCheck logs at: ${env.BUILD_URL}",
                          to: "manishbansal019@gmail.com",
                          from: "manishbansal019@gmail.com"
