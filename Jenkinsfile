@@ -21,38 +21,38 @@ pipeline {
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         retry(2) {
-        //             script {
-        //                 try {
-        //                     bat 'npm install'
-        //                 } catch (Exception e) {
-        //                     echo "Build failed: ${e.message}"
-        //                     error("Stopping pipeline due to build failure.")
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Build') {
+            steps {
+                retry(2) {
+                    script {
+                        try {
+                            bat 'npm install'
+                        } catch (Exception e) {
+                            echo "Build failed: ${e.message}"
+                            error("Stopping pipeline due to build failure.")
+                        }
+                    }
+                }
+            }
+        }
 
-        // stage('Test') {
-        //     steps {
-        //         script {
-        //             try {
-        //                 // bat 'exit 1' // This forces the stage to fail
-        //                 bat 'npm test --runInBand --forceExit'
-        //             } catch (Exception e) {
-        //                 echo "Tests failed: ${e.message}"
-        //                 error("Stopping pipeline due to test failure.")
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Test') {
+            steps {
+                script {
+                    try {
+                        // bat 'exit 1' // This forces the stage to fail
+                        bat 'npm test --runInBand --forceExit'
+                    } catch (Exception e) {
+                        echo "Tests failed: ${e.message}"
+                        error("Stopping pipeline due to test failure.")
+                    }
+                }
+            }
+        }
 
         stage('Docker Build & Push') {
             when {
-                expression { env.BRANCH_NAME == 'maintest' }
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 retry(2) {
@@ -75,7 +75,7 @@ pipeline {
 
         stage('Deploy to Staging') {
             when {
-                expression { env.BRANCH_NAME == 'maintest' }
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 script {
@@ -101,7 +101,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                expression { env.BRANCH_NAME == 'maintest' }
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 script {
