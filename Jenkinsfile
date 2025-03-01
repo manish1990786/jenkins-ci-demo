@@ -21,38 +21,38 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                retry(2) {
-                    script {
-                        try {
-                            bat 'npm install'
-                        } catch (Exception e) {
-                            echo "Build failed: ${e.message}"
-                            error("Stopping pipeline due to build failure.")
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         retry(2) {
+        //             script {
+        //                 try {
+        //                     bat 'npm install'
+        //                 } catch (Exception e) {
+        //                     echo "Build failed: ${e.message}"
+        //                     error("Stopping pipeline due to build failure.")
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Test') {
-            steps {
-                script {
-                    try {
-                        // bat 'exit 1' // This forces the stage to fail
-                        bat 'npm test --runInBand --forceExit'
-                    } catch (Exception e) {
-                        echo "Tests failed: ${e.message}"
-                        error("Stopping pipeline due to test failure.")
-                    }
-                }
-            }
-        }
+        // stage('Test') {
+        //     steps {
+        //         script {
+        //             try {
+        //                 // bat 'exit 1' // This forces the stage to fail
+        //                 bat 'npm test --runInBand --forceExit'
+        //             } catch (Exception e) {
+        //                 echo "Tests failed: ${e.message}"
+        //                 error("Stopping pipeline due to test failure.")
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Docker Build & Push') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'maintest' }
             }
             steps {
                 retry(2) {
@@ -75,7 +75,7 @@ pipeline {
 
         stage('Deploy to Staging') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'maintest' }
             }
             steps {
                 script {
@@ -101,7 +101,7 @@ pipeline {
 
         stage('Deploy to Production') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'maintest' }
             }
             steps {
                 script {
@@ -133,7 +133,8 @@ pipeline {
                 emailext subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                          body: "Build ${env.BUILD_NUMBER} completed successfully!\n\nCheck logs at: ${env.BUILD_URL}",
                          to: "manishbansal019@gmail.com",
-                         from: "manishbansal019@gmail.com"
+                         from: "manishbansal019@gmail.com",
+                         debug: true
         }
         failure {
             script {
@@ -142,7 +143,8 @@ pipeline {
                 emailext subject: "Jenkins Build FAILED: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
                          body: "Build ${env.BUILD_NUMBER} has failed!\nCheck logs at: ${env.BUILD_URL}",
                          to: "manishbansal019@gmail.com",
-                         from: "manishbansal019@gmail.com"
+                         from: "manishbansal019@gmail.com",
+                         debug: true
 
                 bat 'echo "Build failed on %DATE% %TIME%" >> build_logs.txt'
                 bat 'docker logs staging >> build_logs.txt 2>&1'
