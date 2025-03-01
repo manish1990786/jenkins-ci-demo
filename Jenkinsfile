@@ -26,7 +26,7 @@ pipeline {
                 retry(2) {
                     script {
                         try {
-                            bat 'npm install install -qwer'
+                            bat 'npm install'
                         } catch (Exception e) {
                             echo "Build failed: ${e.message}"
                             error("Stopping pipeline due to build failure.")
@@ -40,6 +40,7 @@ pipeline {
             steps {
                 script {
                     try {
+                        bat 'exit 1' // This forces the stage to fail
                         bat 'npm test --runInBand --forceExit'
                     } catch (Exception e) {
                         echo "Tests failed: ${e.message}"
