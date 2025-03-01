@@ -26,7 +26,7 @@ pipeline {
                 retry(2) {
                     script {
                         try {
-                            bat 'npm install'
+                            bat 'npm install install -qwer'
                         } catch (Exception e) {
                             echo "Build failed: ${e.message}"
                             error("Stopping pipeline due to build failure.")
